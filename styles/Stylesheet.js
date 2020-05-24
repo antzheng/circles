@@ -12,20 +12,23 @@ export const colors = {
   purple: "#9061b0",
 };
 
+// size of dots
+export const dotSize = Dimensions.get("window").width / (gridSize * 2.1);
+
 // keys for colors
 export const colorKeys = Object.keys(colors);
 
 // styles for application
 export const styles = StyleSheet.create({
   circle: {
-    height: Dimensions.get("window").width / (gridSize * 2.5),
-    width: Dimensions.get("window").width / (gridSize * 2.5),
+    height: dotSize,
+    width: dotSize,
     borderRadius: 100,
   },
 
   circleHover: {
-    height: Dimensions.get("window").width / (gridSize * 2.5),
-    width: Dimensions.get("window").width / (gridSize * 2.5),
+    height: dotSize,
+    width: dotSize,
     borderRadius: 100,
     opacity: 0.3,
   },
