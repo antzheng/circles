@@ -33,6 +33,42 @@ export const styles = StyleSheet.create({
     opacity: 0.3,
   },
 
+  gameMode: {
+    height: Dimensions.get("window").width / 3.5,
+    width: Dimensions.get("window").width / 3.5,
+    borderRadius: 100,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  gameModeRow: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    alignItems: "center",
+    backgroundColor: "#000",
+  },
+
+  gameModeContainer: {
+    flexDirection: "column",
+  },
+
+  gameModeIcon: {
+    width: Dimensions.get("window").width / 6,
+    height: Dimensions.get("window").width / 6,
+  },
+
+  smallIcon: {
+    width: Dimensions.get("window").width / 10,
+    height: Dimensions.get("window").width / 10,
+  },
+
+  gameModeText: {
+    paddingTop: 10,
+    paddingBottom: 10,
+    color: "#fff",
+    fontSize: Dimensions.get("window").width / 30,
+  },
+
   column: {
     flexDirection: "column-reverse",
     justifyContent: "space-evenly",
@@ -45,7 +81,15 @@ export const styles = StyleSheet.create({
     justifyContent: "space-evenly",
     paddingLeft: "5%",
     paddingRight: "5%",
+    flex: 3,
     backgroundColor: "#000",
+  },
+
+  vertical: {
+    flexDirection: "column",
+    justifyContent: "space-evenly",
+    backgroundColor: "#000",
+    flex: 3,
   },
 
   topBar: {
@@ -56,8 +100,9 @@ export const styles = StyleSheet.create({
   },
 
   bottomBar: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-around",
+    justifyContent: "space-evenly",
     flex: 1,
     backgroundColor: "#000",
   },
@@ -65,6 +110,6 @@ export const styles = StyleSheet.create({
   text: {
     color: "white",
     fontWeight: "bold",
-    fontSize: 25,
+    fontSize: Dimensions.get("window").width / 15,
   },
 });

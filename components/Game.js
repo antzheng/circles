@@ -47,7 +47,10 @@ class Game extends Component {
   componentDidUpdate() {
     // define offset and duration of animation
     const offset = 5;
-    const duration = 100;
+    const duration = 75;
+
+    // specify configs for animation
+    const useNativeDriver = true;
 
     // should i play the animation, prevents infinite cycle
     if (this.state.playAnim) {
@@ -55,18 +58,22 @@ class Game extends Component {
         Animated.timing(this.state.shakeAnimation, {
           toValue: offset * 2,
           duration: duration,
+          useNativeDriver: useNativeDriver,
         }),
         Animated.timing(this.state.shakeAnimation, {
           toValue: -offset * 1.5,
           duration: duration,
+          useNativeDriver: useNativeDriver,
         }),
         Animated.timing(this.state.shakeAnimation, {
           toValue: offset,
           duration: duration,
+          useNativeDriver: useNativeDriver,
         }),
         Animated.timing(this.state.shakeAnimation, {
           toValue: 0,
           duration: duration,
+          useNativeDriver: useNativeDriver,
         }),
       ]).start(({ finished }) => {
         this.setState({ playAnim: false });
@@ -394,7 +401,11 @@ class Game extends Component {
               {column.map((dot, j) => (
                 <Animated.View
                   key={"view " + i + ", " + j}
-                  style={{ top: dot.new ? this.state.shakeAnimation : 0 }}
+                  style={{
+                    transform: [
+                      { translateY: dot.new ? this.state.shakeAnimation : 0 },
+                    ],
+                  }}
                   {...this.panResponder.panHandlers}
                 >
                   <View
