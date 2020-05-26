@@ -1,17 +1,21 @@
-import React, { Component } from "react";
-import { Animated, Text, View, SafeAreaView, Image } from "react-native";
+import React, { PureComponent } from "react";
+import {
+  Dimensions,
+  Text,
+  View,
+  SafeAreaView,
+  Image,
+  TouchableOpacity,
+  I18nManager,
+} from "react-native";
 import { styles, menuColors } from "./../styles/Stylesheet";
-import * as Font from "expo-font";
 
-class Home extends Component {
-  state = { fontLoaded: false };
+class Home extends PureComponent {
+  state = {};
 
-  async componentDidMount() {
-    await Font.loadAsync({
-      "Chelsea-Market": require("./../assets/fonts/ChelseaMarket-Regular.ttf"),
-    });
-
-    this.setState({ fontLoaded: true });
+  constructor(props) {
+    // call super constructor
+    super(props);
   }
 
   render() {
@@ -21,7 +25,7 @@ class Home extends Component {
           <Text
             style={{
               ...styles.titleText,
-              fontFamily: this.state.fontLoaded ? "Chelsea-Market" : "System",
+              fontFamily: this.props.fontLoaded ? "Chelsea-Market" : "System",
             }}
           >
             Circles
@@ -31,22 +35,29 @@ class Home extends Component {
         <View style={styles.vertical}>
           <View style={styles.gameModeRow}>
             <View style={styles.gameModeContainer}>
-              <View
+              <TouchableOpacity
                 style={{
                   ...styles.gameMode,
                   backgroundColor: menuColors.teal,
                 }}
+                onPress={() =>
+                  this.props.navigation.navigate("Game", {
+                    offset: I18nManager.isRTL
+                      ? -Dimensions.get("window").width
+                      : Dimensions.get("window").width,
+                  })
+                }
               >
                 <Image
                   style={styles.gameModeIcon}
                   source={require("./../assets/icons/timed.png")}
                 />
-              </View>
+              </TouchableOpacity>
               <View style={styles.gameModeRow}>
                 <Text
                   style={{
                     ...styles.gameModeText,
-                    fontFamily: this.state.fontLoaded
+                    fontFamily: this.props.fontLoaded
                       ? "Chelsea-Market"
                       : "System",
                   }}
@@ -57,22 +68,29 @@ class Home extends Component {
             </View>
 
             <View style={styles.gameModeContainer}>
-              <View
+              <TouchableOpacity
                 style={{
                   ...styles.gameMode,
                   backgroundColor: menuColors.green,
                 }}
+                onPress={() =>
+                  this.props.navigation.navigate("Game", {
+                    offset: I18nManager.isRTL
+                      ? -Dimensions.get("window").width
+                      : Dimensions.get("window").width,
+                  })
+                }
               >
                 <Image
                   style={styles.gameModeIcon}
                   source={require("./../assets/icons/moves.png")}
                 />
-              </View>
+              </TouchableOpacity>
               <View style={styles.gameModeRow}>
                 <Text
                   style={{
                     ...styles.gameModeText,
-                    fontFamily: this.state.fontLoaded
+                    fontFamily: this.props.fontLoaded
                       ? "Chelsea-Market"
                       : "System",
                   }}
@@ -85,22 +103,29 @@ class Home extends Component {
 
           <View style={styles.gameModeRow}>
             <View style={styles.gameModeContainer}>
-              <View
+              <TouchableOpacity
                 style={{
                   ...styles.gameMode,
                   backgroundColor: menuColors.red,
                 }}
+                onPress={() =>
+                  this.props.navigation.navigate("Game", {
+                    offset: I18nManager.isRTL
+                      ? -Dimensions.get("window").width
+                      : Dimensions.get("window").width,
+                  })
+                }
               >
                 <Image
                   style={styles.gameModeIcon}
                   source={require("./../assets/icons/endless.png")}
                 />
-              </View>
+              </TouchableOpacity>
               <View style={styles.gameModeRow}>
                 <Text
                   style={{
                     ...styles.gameModeText,
-                    fontFamily: this.state.fontLoaded
+                    fontFamily: this.props.fontLoaded
                       ? "Chelsea-Market"
                       : "System",
                   }}

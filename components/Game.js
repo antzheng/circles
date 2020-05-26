@@ -1,5 +1,13 @@
-import React, { Component } from "react";
-import { Animated, PanResponder, Text, View, SafeAreaView } from "react-native";
+import React, { PureComponent } from "react";
+import {
+  Animated,
+  PanResponder,
+  Text,
+  View,
+  SafeAreaView,
+  TouchableOpacity,
+  Image,
+} from "react-native";
 import {
   styles,
   gridSize,
@@ -8,7 +16,7 @@ import {
   dotSize,
 } from "./../styles/Stylesheet";
 
-class Game extends Component {
+class Game extends PureComponent {
   // list all possible states for later
   state = {
     dots: null, // grid of dots
@@ -23,9 +31,9 @@ class Game extends Component {
     freeze: null, // prevent adding if there is a square
   };
 
-  constructor() {
+  constructor(props) {
     // call super constructor
-    super();
+    super(props);
 
     // populate the dots grid
     const dots = this.populateGrid([]);
@@ -83,6 +91,11 @@ class Game extends Component {
         this.setState({ playAnim: false });
       });
     }
+  }
+
+  // clear timers and cleanup
+  componentWillUnmount() {
+    // console.log("unmounting");
   }
 
   // set up panresponder and gesture values
@@ -427,6 +440,10 @@ class Game extends Component {
 
   // store new pivot information
   setPivot = (i, j) => {
+    // check if there is offset from navigation transition
+    const offset = this.props.route.params
+      ? this.props.route.params.offset || 0
+      : 0;
     // store reference to view
     const view = this.refs["dot" + i + j];
 
@@ -435,7 +452,7 @@ class Game extends Component {
       const layout = {
         width: width,
         height: height,
-        x: pageX,
+        x: pageX - offset,
         y: pageY,
       };
 
@@ -489,7 +506,14 @@ class Game extends Component {
     return (
       <>
         <SafeAreaView style={styles.topBar}>
-          <Text style={styles.text}> Score: {this.state.score} </Text>
+          <Text
+            style={{
+              ...styles.text,
+              fontFamily: this.props.fontLoaded ? "Chelsea-Market" : "System",
+            }}
+          >
+            Score: {this.state.score}
+          </Text>
         </SafeAreaView>
         <View collapsable={false} style={styles.horizontal}>
           {this.state.dots.map((column, i) => (
@@ -520,9 +544,12 @@ class Game extends Component {
           ))}
         </View>
         <View style={styles.bottomBar}>
-          <Text style={styles.text}>
-            Possible: {this.state.possible.toString()}
-          </Text>
+          <TouchableOpacity onPress={() => this.props.navigation.popToTop()}>
+            <Image
+              style={styles.smallIcon}
+              source={require("./../assets/icons/exit.png")}
+            />
+          </TouchableOpacity>
         </View>
       </>
     );
