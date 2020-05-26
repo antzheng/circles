@@ -7,7 +7,9 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Image,
+  AsyncStorage,
 } from "react-native";
+import debounce from "lodash/debounce";
 import {
   styles,
   gridSize,
@@ -15,6 +17,9 @@ import {
   colorKeys,
   dotSize,
 } from "./../styles/Stylesheet";
+
+const TimeLeft = 60;
+const MovesLeft = 30;
 
 class Game extends PureComponent {
   // list all possible states for later
@@ -29,6 +34,9 @@ class Game extends PureComponent {
     score: null, // how many dots have been popped
     possible: null, // are there any possible moves
     freeze: null, // prevent adding if there is a square
+    TimeLeft: null, // number of seconds left for Timed mode
+    MovesLeft: null, // number of moves left for Moves mode
+    mode: null, // current mode the user is in
   };
 
   constructor(props) {
@@ -52,11 +60,155 @@ class Game extends PureComponent {
       score: 0,
       possible: true,
       freeze: false,
+      TimeLeft: TimeLeft,
+      MovesLeft: MovesLeft,
+      mode: props.route.params ? props.route.params.mode : "Endless",
     };
   }
 
+  // bind necessary methods
+  componentDidMount() {
+    this.navigate = debounce(this.navigate, 500, {
+      leading: true,
+      trailing: false,
+    });
+    this.pop = debounce(this.pop, 500, {
+      leading: true,
+      trailing: false,
+    });
+    this.popToTop = debounce(this.popToTop, 500, {
+      leading: true,
+      trailing: false,
+    });
+
+    // interval for Timed mode
+    this.interval = null;
+
+    // set up gameplay for modes
+    if (this.state.mode === "Time") {
+      this.interval = setInterval(() => {
+        this.setState((state) => {
+          if (state.TimeLeft === 1) clearInterval(this.interval);
+          return { TimeLeft: state.TimeLeft - 1 };
+        });
+      }, 1000);
+    }
+  }
+
+  // method to navigate to new screen
+  navigate = (route, params) => {
+    this.props.navigation.navigate(route, params);
+  };
+
+  // method to go back one screen
+  pop = () => {
+    this.props.navigation.pop();
+  };
+
+  // method to go to the home screen
+  popToTop = () => {
+    this.props.navigation.popToTop();
+  };
+
+  // refresh the state when game board is loaded from game over
+  refresh = () => {
+    // reset state
+    this.setState({
+      dots: this.populateGrid([]),
+      currentDot: null,
+      path: [],
+      toRemove: [],
+      shakeAnimation: new Animated.Value(0),
+      playAnim: false,
+      score: 0,
+      possible: true,
+      freeze: false,
+      TimeLeft: TimeLeft,
+      MovesLeft: MovesLeft,
+    });
+
+    // set up gameplay for modes
+    if (this.state.mode === "Time") {
+      this.interval = setInterval(() => {
+        this.setState((state) => {
+          if (state.TimeLeft === 1) clearInterval(this.interval);
+          return { TimeLeft: state.TimeLeft - 1 };
+        });
+      }, 1000);
+    }
+  };
+
+  // retrieve score from async storage
+  retrieveScore = async () => {
+    try {
+      const key = "@" + this.state.mode + "-highscore";
+      const score = await AsyncStorage.getItem(key);
+      return JSON.parse(score) || 0;
+    } catch (e) {
+      return 0;
+    }
+  };
+
+  // save score to async storage
+  saveScore = async () => {
+    try {
+      const key = "@" + this.state.mode + "-highscore";
+      await AsyncStorage.setItem(key, JSON.stringify(this.state.score));
+    } catch (e) {}
+  };
+
+  // shuffle the grid
+  shuffleGrid = () => {
+    // navigate to shuffling
+    this.navigate("Shuffling");
+
+    // reset state
+    this.setState({
+      dots: this.populateGrid([]),
+      currentDot: null,
+      path: [],
+      toRemove: [],
+      shakeAnimation: new Animated.Value(0),
+      playAnim: false,
+      freeze: false,
+      shufflingBoolean: true,
+      possible: true,
+    });
+  };
+
   // run animation after render
-  componentDidUpdate() {
+  async componentDidUpdate() {
+    // define game over
+    if (
+      (this.state.mode === "Time" && !this.state.possible) ||
+      this.state.TimeLeft === 0 ||
+      this.state.MovesLeft === 0
+    ) {
+      // clear intervals
+      clearInterval(this.interval);
+
+      // get old highscore for this mode
+      let highscore = await this.retrieveScore();
+
+      // compare scores
+      if (this.state.score > highscore) {
+        await this.saveScore();
+        highscore = this.state.score;
+      }
+
+      // navigate to Game Over page
+      this.navigate("GameOver", {
+        mode: this.state.mode,
+        refresh: this.refresh,
+        score: this.state.score,
+        highscore: highscore,
+      });
+    }
+    // shuffle if need
+    else if (!this.state.possible) {
+      this.shuffleGrid();
+    }
+
     // define offset and duration of animation
     const offset = 5;
     const duration = 75;
@@ -95,7 +247,7 @@ class Game extends PureComponent {
 
   // clear timers and cleanup
   componentWillUnmount() {
-    // console.log("unmounting");
+    clearInterval(this.interval);
   }
 
   // set up panresponder and gesture values
@@ -252,7 +404,7 @@ class Game extends PureComponent {
       const dots = state.dots;
       const size = dots.length;
       const keys = colorKeys;
-      const added = state.path.length;
+      const added = state.path.length + state.toRemove.length;
 
       // if path contains one dot, reset but do not clear
       if (state.path.length === 1) {
@@ -309,6 +461,8 @@ class Game extends PureComponent {
         possible: this.checkGrid(dots),
         freeze: false,
         toRemove: [],
+        MovesLeft:
+          state.mode === "Moves" ? state.MovesLeft - 1 : state.MovesLeft,
       };
     });
   };
@@ -444,6 +598,7 @@ class Game extends PureComponent {
     const offset = this.props.route.params
       ? this.props.route.params.offset || 0
       : 0;
+
     // store reference to view
     const view = this.refs["dot" + i + j];
 
@@ -506,6 +661,18 @@ class Game extends PureComponent {
     return (
       <>
         <SafeAreaView style={styles.topBar}>
+          {this.state.mode !== "Endless" ? (
+            <Text
+              style={{
+                ...styles.text,
+                fontFamily: this.props.fontLoaded ? "Chelsea-Market" : "System",
+              }}
+            >
+              {this.state.mode}: {this.state[this.state.mode + "Left"]}
+            </Text>
+          ) : (
+            <></>
+          )}
           <Text
             style={{
               ...styles.text,
@@ -523,7 +690,9 @@ class Game extends PureComponent {
                   key={"view " + i + ", " + j}
                   style={{
                     transform: [
-                      { translateY: dot.new ? this.state.shakeAnimation : 0 },
+                      {
+                        translateY: dot.new ? this.state.shakeAnimation : 0,
+                      },
                     ],
                   }}
                   {...this.panResponder.panHandlers}
@@ -544,9 +713,9 @@ class Game extends PureComponent {
           ))}
         </View>
         <View style={styles.bottomBar}>
-          <TouchableOpacity onPress={() => this.props.navigation.popToTop()}>
+          <TouchableOpacity onPress={() => this.popToTop()}>
             <Image
-              style={styles.smallIcon}
+              style={styles.mediumIcon}
               source={require("./../assets/icons/exit.png")}
             />
           </TouchableOpacity>

@@ -8,15 +8,42 @@ import {
   TouchableOpacity,
   I18nManager,
 } from "react-native";
+import debounce from "lodash/debounce";
 import { styles, menuColors } from "./../styles/Stylesheet";
 
 class Home extends PureComponent {
   state = {};
 
-  constructor(props) {
-    // call super constructor
-    super(props);
+  // bind necessary methods
+  componentDidMount() {
+    this.navigate = debounce(this.navigate, 500, {
+      leading: true,
+      trailing: false,
+    });
+    this.pop = debounce(this.pop, 500, {
+      leading: true,
+      trailing: false,
+    });
+    this.popToTop = debounce(this.popToTop, 500, {
+      leading: true,
+      trailing: false,
+    });
   }
+
+  // method to navigate to new screen
+  navigate = (route, params) => {
+    this.props.navigation.navigate(route, params);
+  };
+
+  // method to go back one screen
+  pop = () => {
+    this.props.navigation.pop();
+  };
+
+  // method to go to the home screen
+  popToTop = () => {
+    this.props.navigation.popToTop();
+  };
 
   render() {
     return (
@@ -41,10 +68,11 @@ class Home extends PureComponent {
                   backgroundColor: menuColors.teal,
                 }}
                 onPress={() =>
-                  this.props.navigation.navigate("Game", {
+                  this.navigate("Game", {
                     offset: I18nManager.isRTL
                       ? -Dimensions.get("window").width
                       : Dimensions.get("window").width,
+                    mode: "Time",
                   })
                 }
               >
@@ -74,10 +102,11 @@ class Home extends PureComponent {
                   backgroundColor: menuColors.green,
                 }}
                 onPress={() =>
-                  this.props.navigation.navigate("Game", {
+                  this.navigate("Game", {
                     offset: I18nManager.isRTL
                       ? -Dimensions.get("window").width
                       : Dimensions.get("window").width,
+                    mode: "Moves",
                   })
                 }
               >
@@ -109,10 +138,11 @@ class Home extends PureComponent {
                   backgroundColor: menuColors.red,
                 }}
                 onPress={() =>
-                  this.props.navigation.navigate("Game", {
+                  this.navigate("Game", {
                     offset: I18nManager.isRTL
                       ? -Dimensions.get("window").width
                       : Dimensions.get("window").width,
+                    mode: "Endless",
                   })
                 }
               >

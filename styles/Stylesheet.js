@@ -78,6 +78,11 @@ export const styles = StyleSheet.create({
     height: Dimensions.get("window").width / 13,
   },
 
+  mediumIcon: {
+    width: Dimensions.get("window").width / 8,
+    height: Dimensions.get("window").width / 8,
+  },
+
   gameModeText: {
     paddingTop: 10,
     paddingBottom: 10,
@@ -109,6 +114,7 @@ export const styles = StyleSheet.create({
   },
 
   topBar: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
     flex: 1,
@@ -133,5 +139,21 @@ export const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
     fontSize: Dimensions.get("window").width / 8,
+  },
+
+  scoreText: {
+    color: menuColors.teal,
+    fontWeight: "bold",
+    fontSize: Dimensions.get("window").width / 5,
+  },
+
+  playAgainIcon: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    width: Dimensions.get("window").width * 0.6,
+    height: Dimensions.get("window").width / 8,
+    backgroundColor: menuColors.teal,
+    borderRadius: 100,
   },
 });
