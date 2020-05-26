@@ -3,13 +3,29 @@ import { Dimensions, StyleSheet } from "react-native";
 // size of grid
 export const gridSize = 6;
 
-// colors of dots
+// color palette from Dots
+// export const colors = {
+//   red: "#db664f",
+//   blue: "#93bcf9",
+//   green: "#a0e599",
+//   yellow: "#e4d950",
+//   purple: "#9061b0",
+// };
+
+// color palette from Two Dots
 export const colors = {
-  red: "#db664f",
-  blue: "#93bcf9",
-  green: "#a0e599",
-  yellow: "#e4d950",
-  purple: "#9061b0",
+  red: "#e84d60",
+  blue: "#718dbf",
+  green: "#77c298",
+  yellow: "#fecd6c",
+  purple: "#a4547d",
+};
+
+// menu colors
+export const menuColors = {
+  red: "#ec5c5d",
+  teal: "#50b3a3",
+  green: "#88c070",
 };
 
 // size of dots
@@ -53,20 +69,20 @@ export const styles = StyleSheet.create({
   },
 
   gameModeIcon: {
-    width: Dimensions.get("window").width / 6,
-    height: Dimensions.get("window").width / 6,
+    width: Dimensions.get("window").width / 6.5,
+    height: Dimensions.get("window").width / 6.5,
   },
 
   smallIcon: {
-    width: Dimensions.get("window").width / 10,
-    height: Dimensions.get("window").width / 10,
+    width: Dimensions.get("window").width / 13,
+    height: Dimensions.get("window").width / 13,
   },
 
   gameModeText: {
     paddingTop: 10,
     paddingBottom: 10,
     color: "#fff",
-    fontSize: Dimensions.get("window").width / 30,
+    fontSize: Dimensions.get("window").width / 25,
   },
 
   column: {
@@ -87,7 +103,7 @@ export const styles = StyleSheet.create({
 
   vertical: {
     flexDirection: "column",
-    justifyContent: "space-evenly",
+    justifyContent: "center",
     backgroundColor: "#000",
     flex: 3,
   },
@@ -111,5 +127,11 @@ export const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
     fontSize: Dimensions.get("window").width / 15,
+  },
+
+  titleText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: Dimensions.get("window").width / 8,
   },
 });

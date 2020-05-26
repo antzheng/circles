@@ -11,14 +11,16 @@ import {
 class Game extends Component {
   // list all possible states for later
   state = {
-    dots: null,
-    pivots: null,
-    currentDot: null,
-    path: null,
-    shakeAnimation: null,
-    playAnim: null,
-    score: null,
-    possible: null,
+    dots: null, // grid of dots
+    pivots: null, // coordinates for dots
+    currentDot: null, // current dot
+    path: null, // the path to be removed
+    toRemove: null, // list of removable dots not included in path
+    shakeAnimation: null, // shake animation value
+    playAnim: null, // should the animation play
+    score: null, // how many dots have been popped
+    possible: null, // are there any possible moves
+    freeze: null, // prevent adding if there is a square
   };
 
   constructor() {
@@ -36,10 +38,12 @@ class Game extends Component {
         .map(() => Array(gridSize).fill(0)),
       currentDot: null,
       path: [],
+      toRemove: [],
       shakeAnimation: new Animated.Value(0),
       playAnim: false,
       score: 0,
       possible: true,
+      freeze: false,
     };
   }
 
@@ -142,14 +146,30 @@ class Game extends Component {
         // delete dot from path
         const [oldX, oldY] = path.pop();
 
+        let stillInPath = false;
+        for (const [x, y] of path) {
+          if (oldX === x && oldY === y) {
+            stillInPath = true;
+            break;
+          }
+        }
+
         // change styling
-        dots[oldX][oldY].styling = "circle";
+        dots[oldX][oldY].styling = stillInPath ? "circleHover" : "circle";
+
+        for (const [x, y] of state.toRemove) {
+          if (dots[x][y].color === dots[oldX][oldY].color) {
+            dots[x][y].styling = "circle";
+          }
+        }
 
         // set up new state
         return {
           dots: dots,
           path: path,
           currentDot: res,
+          freeze: false,
+          toRemove: [],
         };
       });
     }
@@ -169,6 +189,43 @@ class Game extends Component {
           dots: dots,
           path: newPath,
           currentDot: res,
+        };
+      });
+    }
+    // highlight all dots of same color if there is square
+    else if (this.isSquare(res, currentDot)) {
+      this.setState((state) => {
+        // change dot styling and add to toRemove
+        const dots = state.dots;
+        const toRemove = [];
+
+        for (let i = 0; i < gridSize; i++) {
+          for (let j = 0; j < gridSize; j++) {
+            let exclude = false;
+            for (const [x, y] of state.path) {
+              if (i === x && j === y) {
+                exclude = true;
+                break;
+              }
+            }
+            if (!exclude && dots[i][j].color === dots[res[0]][res[1]].color) {
+              dots[i][j].styling = "circleHover";
+              toRemove.push([i, j]);
+            }
+          }
+        }
+
+        // add dot to path
+        const newPath = state.path;
+        newPath.push(res);
+
+        // set up new state
+        return {
+          dots: dots,
+          path: newPath,
+          currentDot: res,
+          toRemove: toRemove,
+          freeze: true,
         };
       });
     }
@@ -208,6 +265,12 @@ class Game extends Component {
               break;
             }
           }
+          for (const [x, y] of state.toRemove) {
+            if (i === x && j === y) {
+              exclude = true;
+              break;
+            }
+          }
           if (!exclude) {
             dots[i][j].new = false;
             newColumn.push(dots[i][j]);
@@ -231,6 +294,8 @@ class Game extends Component {
         playAnim: true,
         score: state.score + added,
         possible: this.checkGrid(dots),
+        freeze: false,
+        toRemove: [],
       };
     });
   };
@@ -291,6 +356,7 @@ class Game extends Component {
     const dots = this.state.dots;
 
     if (res === null) return false;
+    if (this.state.freeze) return false;
     if (curr === null) return true;
 
     const [newX, newY] = res;
@@ -327,6 +393,36 @@ class Game extends Component {
     const [checkX, checkY] = path[path.length - 2];
 
     return checkX === newX && checkY === newY;
+  };
+
+  // check if there is a square
+  isSquare = (res, curr) => {
+    // store reference to grid of dots
+    const dots = this.state.dots;
+
+    if (res === null || curr === null || this.state.freeze) return false;
+
+    const [newX, newY] = res;
+    const [currX, currY] = curr;
+
+    let isInPath = false;
+
+    // check if the dot already exists
+    for (const [x, y] of this.state.path) {
+      if (newX === x && newY === y) {
+        isInPath = true;
+        break;
+      }
+    }
+
+    return (
+      dots[currX][currY].color === dots[newX][newY].color &&
+      isInPath &&
+      ((newX === currX - 1 && newY === currY) ||
+        (newX === currX + 1 && newY === currY) ||
+        (newX === currX && newY === currY - 1) ||
+        (newX === currX && newY === currY + 1))
+    );
   };
 
   // store new pivot information
