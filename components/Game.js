@@ -38,18 +38,11 @@ class Game extends PureComponent {
     mode: null, // current mode the user is in
   };
 
+  // -------------------- INITIAL SETUP --------------------
+
   constructor(props) {
     // call super constructor
     super(props);
-
-    // set up the refs
-    this.refsGrid = Array(gridSize)
-      .fill()
-      .map(() =>
-        Array(gridSize)
-          .fill()
-          .map(() => React.createRef())
-      );
 
     // populate the dots grid
     const dots = this.populateGrid([]);
@@ -70,11 +63,15 @@ class Game extends PureComponent {
       freeze: false,
       TimeLeft: TimeLeft,
       MovesLeft: MovesLeft,
-      mode: props.route.params ? props.route.params.mode : "Endless",
+      mode: props.route.params
+        ? props.route.params.mode || "Endless"
+        : "Endless",
     };
   }
 
-  // set up when component first mounts
+  // -------------------- LIFECYCLE METHODS --------------------
+
+  // on first render
   componentDidMount() {
     // bind necessary methods
     this.navigate = debounce(this.navigate, 500, {
@@ -90,6 +87,7 @@ class Game extends PureComponent {
       trailing: false,
     });
 
+    // set up pivots after slight delay
     setTimeout(() => {
       // set up the coordinate system
       for (let i = 0; i < gridSize; i++) {
@@ -99,10 +97,9 @@ class Game extends PureComponent {
       }
     }, 500);
 
-    // interval for Timed mode
+    // set up Timer for Timed mode
     this.interval = null;
 
-    // set up gameplay for modes
     if (this.state.mode === "Time") {
       this.interval = setInterval(() => {
         this.setState((state) => {
@@ -113,88 +110,7 @@ class Game extends PureComponent {
     }
   }
 
-  // method to navigate to new screen
-  navigate = (route, params) => {
-    this.props.navigation.navigate(route, params);
-  };
-
-  // method to go back one screen
-  pop = () => {
-    this.props.navigation.pop();
-  };
-
-  // method to go to the home screen
-  popToTop = () => {
-    this.props.navigation.popToTop();
-  };
-
-  // refresh the state when game board is loaded from game over
-  refresh = () => {
-    // reset state
-    this.setState({
-      dots: this.populateGrid([]),
-      currentDot: null,
-      path: [],
-      toRemove: [],
-      shakeAnimation: new Animated.Value(0),
-      playAnim: false,
-      score: 0,
-      possible: true,
-      freeze: false,
-      TimeLeft: TimeLeft,
-      MovesLeft: MovesLeft,
-    });
-
-    // set up gameplay for modes
-    if (this.state.mode === "Time") {
-      this.interval = setInterval(() => {
-        this.setState((state) => {
-          if (state.TimeLeft === 1) clearInterval(this.interval);
-          return { TimeLeft: state.TimeLeft - 1 };
-        });
-      }, 1000);
-    }
-  };
-
-  // retrieve score from async storage
-  retrieveScore = async () => {
-    try {
-      const key = "@" + this.state.mode + "-highscore";
-      const score = await AsyncStorage.getItem(key);
-      return JSON.parse(score) || 0;
-    } catch (e) {
-      return 0;
-    }
-  };
-
-  // save score to async storage
-  saveScore = async () => {
-    try {
-      const key = "@" + this.state.mode + "-highscore";
-      await AsyncStorage.setItem(key, JSON.stringify(this.state.score));
-    } catch (e) {}
-  };
-
-  // shuffle the grid
-  shuffleGrid = () => {
-    // navigate to shuffling
-    this.navigate("Shuffling");
-
-    // reset state
-    this.setState({
-      dots: this.populateGrid([]),
-      currentDot: null,
-      path: [],
-      toRemove: [],
-      shakeAnimation: new Animated.Value(0),
-      playAnim: false,
-      freeze: false,
-      shufflingBoolean: true,
-      possible: true,
-    });
-  };
-
-  // run animation after render
+  // on subsequent renders
   async componentDidUpdate() {
     // define game over
     if (
@@ -224,7 +140,7 @@ class Game extends PureComponent {
         highscore: highscore,
       });
     }
-    // shuffle if need
+    // if not game over, shuffle if need
     else if (!this.state.possible) {
       this.shuffleGrid();
     }
@@ -236,7 +152,7 @@ class Game extends PureComponent {
     // specify configs for animation
     const useNativeDriver = true;
 
-    // should i play the animation, prevents infinite cycle
+    // only plays when necessary, prevents infinite cycle
     if (this.state.playAnim) {
       this.setState({ playAnim: false });
       Animated.sequence([
@@ -260,16 +176,55 @@ class Game extends PureComponent {
           duration: duration,
           useNativeDriver: useNativeDriver,
         }),
-      ]).start(({ finished }) => {
-        // this.setState({ playAnim: false });
-      });
+      ]).start();
     }
   }
 
-  // clear timers and cleanup
+  // when screen unmounts
   componentWillUnmount() {
+    // clear intervals
     clearInterval(this.interval);
   }
+
+  // -------------------- NAVIGATION METHODS --------------------
+
+  // method to navigate to new screen
+  navigate = (route, params) => {
+    this.props.navigation.navigate(route, params);
+  };
+
+  // method to go back one screen
+  pop = () => {
+    this.props.navigation.pop();
+  };
+
+  // method to go to the home screen
+  popToTop = () => {
+    this.props.navigation.popToTop();
+  };
+
+  // -------------------- STORAGE METHODS --------------------
+
+  // retrieve score from async storage
+  retrieveScore = async () => {
+    try {
+      const key = "@" + this.state.mode + "-highscore";
+      const score = await AsyncStorage.getItem(key);
+      return JSON.parse(score) || 0;
+    } catch (e) {
+      return 0;
+    }
+  };
+
+  // save score to async storage
+  saveScore = async () => {
+    try {
+      const key = "@" + this.state.mode + "-highscore";
+      await AsyncStorage.setItem(key, JSON.stringify(this.state.score));
+    } catch (e) {}
+  };
+
+  // -------------------- PANRESPONDER SETUP --------------------
 
   // set up panresponder and gesture values
   panResponder = PanResponder.create({
@@ -288,6 +243,8 @@ class Game extends PureComponent {
     onPanResponderRelease: (event, gestureState) =>
       this.handlerRelease(event, gestureState),
   });
+
+  // -------------------- PANRESPONDER HANDLERS --------------------
 
   // handler for initial touch
   handlerTouch = (event, gestureState) => {
@@ -359,7 +316,7 @@ class Game extends PureComponent {
         };
       });
     }
-    // update dot if user has hovered over new one
+    // otherwise, update dot if user has hovered over new one
     else if (this.canAddToPath(res, currentDot)) {
       this.setState((state) => {
         // change dot styling
@@ -378,7 +335,7 @@ class Game extends PureComponent {
         };
       });
     }
-    // highlight all dots of same color if there is square
+    // otherwise, highlight all dots of same color if there is square
     else if (this.isSquare(res, currentDot)) {
       this.setState((state) => {
         // change dot styling and add to toRemove
@@ -491,6 +448,55 @@ class Game extends PureComponent {
     });
   };
 
+  // -------------------- GRID HELPER METHODS --------------------
+
+  // refresh the state when game board is loaded from game over
+  refresh = () => {
+    // reset state
+    this.setState({
+      dots: this.populateGrid([]),
+      currentDot: null,
+      path: [],
+      toRemove: [],
+      shakeAnimation: new Animated.Value(0),
+      playAnim: false,
+      score: 0,
+      possible: true,
+      freeze: false,
+      TimeLeft: TimeLeft,
+      MovesLeft: MovesLeft,
+    });
+
+    // set up Timer for Timed mode
+    if (this.state.mode === "Time") {
+      this.interval = setInterval(() => {
+        this.setState((state) => {
+          if (state.TimeLeft === 1) clearInterval(this.interval);
+          return { TimeLeft: state.TimeLeft - 1 };
+        });
+      }, 1000);
+    }
+  };
+
+  // shuffle the grid
+  shuffleGrid = () => {
+    // navigate to shuffling
+    this.navigate("Shuffling");
+
+    // reset state
+    this.setState({
+      dots: this.populateGrid([]),
+      currentDot: null,
+      path: [],
+      toRemove: [],
+      shakeAnimation: new Animated.Value(0),
+      playAnim: false,
+      freeze: false,
+      shufflingBoolean: true,
+      possible: true,
+    });
+  };
+
   // check grid to see if any moves are possible
   checkGrid = (grid) => {
     for (let i = 0; i < grid.length; i++) {
@@ -517,6 +523,7 @@ class Game extends PureComponent {
     return false;
   };
 
+  // populate the grid with dots
   populateGrid = (dots) => {
     // configure size of grid
     const size = gridSize;
@@ -616,6 +623,8 @@ class Game extends PureComponent {
     );
   };
 
+  // -------------------- PIVOT METHODS --------------------
+
   // store new pivot information
   setPivot = (i, j) => {
     // store reference to view
@@ -678,6 +687,8 @@ class Game extends PureComponent {
     }
     return finalPivot;
   };
+
+  // -------------------- JSX SCREEN LAYOUT --------------------
 
   render() {
     return (

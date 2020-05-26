@@ -6,7 +6,11 @@ import { styles } from "./../styles/Stylesheet";
 class Shuffling extends PureComponent {
   state = { message: "Shuffling" };
 
+  // -------------------- LIFECYCLE METHODS --------------------
+
+  // on first render
   componentDidMount() {
+    // bind necessary methods
     this.navigate = debounce(this.navigate, 500, {
       leading: true,
       trailing: false,
@@ -20,6 +24,7 @@ class Shuffling extends PureComponent {
       trailing: false,
     });
 
+    // animate the shuffling message
     this.interval = setInterval(() => {
       this.setState((state) => {
         if (state.message === "Shuffling...") {
@@ -32,9 +37,13 @@ class Shuffling extends PureComponent {
     }, 200);
   }
 
+  // when screen unmounts
   componentWillUnmount() {
+    // clear animation
     clearInterval(this.interval);
   }
+
+  // -------------------- NAVIGATION METHODS --------------------
 
   // method to navigate to new screen
   navigate = (route, params) => {
@@ -42,8 +51,7 @@ class Shuffling extends PureComponent {
   };
 
   // method to go back one screen
-  pop = (refresh) => {
-    if (refresh) this.props.route.params.refresh();
+  pop = () => {
     this.props.navigation.pop();
   };
 
@@ -51,6 +59,8 @@ class Shuffling extends PureComponent {
   popToTop = () => {
     this.props.navigation.popToTop();
   };
+
+  // -------------------- JSX SCREEN LAYOUT --------------------
 
   render() {
     return (

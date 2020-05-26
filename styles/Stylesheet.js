@@ -1,13 +1,17 @@
 import { Dimensions, StyleSheet } from "react-native";
 
+// -------------------- GAMEPLAY CONSTANTS --------------------
+
 // size of grid
-export const gridSize = 3;
+export const gridSize = 6;
 
 // number of seconds for Timed mode
-export const TimeLeft = 10;
+export const TimeLeft = 60;
 
 // number of moves for Moves mode
 export const MovesLeft = 30;
+
+// -------------------- STYLING CONSTANTS --------------------
 
 // color palette from Dots
 // export const colors = {
@@ -40,8 +44,12 @@ export const dotSize = Dimensions.get("window").width / (gridSize * 2.1);
 // keys for colors
 export const colorKeys = Object.keys(colors);
 
+// -------------------- ELEMENT STYLE SHEET --------------------
+
 // styles for application
 export const styles = StyleSheet.create({
+  // -------------------- CIRCLE STYLING --------------------
+
   circle: {
     height: dotSize,
     width: dotSize,
@@ -54,6 +62,8 @@ export const styles = StyleSheet.create({
     borderRadius: 100,
     opacity: 0.3,
   },
+
+  // -------------------- MENU SCREEN --------------------
 
   gameMode: {
     height: Dimensions.get("window").width / 3.5,
@@ -79,6 +89,15 @@ export const styles = StyleSheet.create({
     height: Dimensions.get("window").width / 6.5,
   },
 
+  gameModeText: {
+    paddingTop: 10,
+    paddingBottom: 10,
+    color: "#fff",
+    fontSize: Dimensions.get("window").width / 25,
+  },
+
+  // -------------------- ICON STYLING --------------------
+
   smallIcon: {
     width: Dimensions.get("window").width / 13,
     height: Dimensions.get("window").width / 13,
@@ -89,12 +108,17 @@ export const styles = StyleSheet.create({
     height: Dimensions.get("window").width / 8,
   },
 
-  gameModeText: {
-    paddingTop: 10,
-    paddingBottom: 10,
-    color: "#fff",
-    fontSize: Dimensions.get("window").width / 25,
+  playAgainIcon: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    width: Dimensions.get("window").width * 0.6,
+    height: Dimensions.get("window").width / 8,
+    backgroundColor: menuColors.teal,
+    borderRadius: 100,
   },
+
+  // -------------------- FLEXBOX STYLING --------------------
 
   column: {
     flexDirection: "column-reverse",
@@ -135,6 +159,8 @@ export const styles = StyleSheet.create({
     backgroundColor: "#000",
   },
 
+  // -------------------- TEXT STYLING --------------------
+
   text: {
     color: "white",
     fontWeight: "bold",
@@ -151,15 +177,5 @@ export const styles = StyleSheet.create({
     color: menuColors.teal,
     fontWeight: "bold",
     fontSize: Dimensions.get("window").width / 5,
-  },
-
-  playAgainIcon: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    width: Dimensions.get("window").width * 0.6,
-    height: Dimensions.get("window").width / 8,
-    backgroundColor: menuColors.teal,
-    borderRadius: 100,
   },
 });

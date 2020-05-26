@@ -12,8 +12,11 @@ import { styles } from "./../styles/Stylesheet";
 class GameOver extends PureComponent {
   state = {};
 
-  // bind necessary methods
+  // -------------------- LIFECYCLE METHODS --------------------
+
+  // on first render
   componentDidMount() {
+    // bind necessary methods
     this.navigate = debounce(this.navigate, 500, {
       leading: true,
       trailing: false,
@@ -27,6 +30,8 @@ class GameOver extends PureComponent {
       trailing: false,
     });
   }
+
+  // -------------------- NAVIGATION METHODS --------------------
 
   // method to navigate to new screen
   navigate = (route, params) => {
@@ -43,6 +48,8 @@ class GameOver extends PureComponent {
   popToTop = () => {
     this.props.navigation.popToTop();
   };
+
+  // -------------------- JSX SCREEN LAYOUT --------------------
 
   render() {
     return (

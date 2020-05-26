@@ -12,8 +12,11 @@ import { styles, menuColors } from "./../styles/Stylesheet";
 class Home extends PureComponent {
   state = {};
 
-  // bind necessary methods
+  // -------------------- LIFECYCLE METHODS --------------------
+
+  // on first render
   componentDidMount() {
+    // bind necessary methods
     this.navigate = debounce(this.navigate, 500, {
       leading: true,
       trailing: false,
@@ -27,6 +30,8 @@ class Home extends PureComponent {
       trailing: false,
     });
   }
+
+  // -------------------- NAVIGATION METHODS --------------------
 
   // method to navigate to new screen
   navigate = (route, params) => {
@@ -42,6 +47,8 @@ class Home extends PureComponent {
   popToTop = () => {
     this.props.navigation.popToTop();
   };
+
+  // -------------------- JSX SCREEN LAYOUT --------------------
 
   render() {
     return (
