@@ -1,12 +1,10 @@
 import React, { PureComponent } from "react";
 import {
-  Dimensions,
   Text,
   View,
   SafeAreaView,
   Image,
   TouchableOpacity,
-  I18nManager,
 } from "react-native";
 import debounce from "lodash/debounce";
 import { styles, menuColors } from "./../styles/Stylesheet";
@@ -69,9 +67,6 @@ class Home extends PureComponent {
                 }}
                 onPress={() =>
                   this.navigate("Game", {
-                    offset: I18nManager.isRTL
-                      ? -Dimensions.get("window").width
-                      : Dimensions.get("window").width,
                     mode: "Time",
                   })
                 }
@@ -103,9 +98,6 @@ class Home extends PureComponent {
                 }}
                 onPress={() =>
                   this.navigate("Game", {
-                    offset: I18nManager.isRTL
-                      ? -Dimensions.get("window").width
-                      : Dimensions.get("window").width,
                     mode: "Moves",
                   })
                 }
@@ -139,9 +131,6 @@ class Home extends PureComponent {
                 }}
                 onPress={() =>
                   this.navigate("Game", {
-                    offset: I18nManager.isRTL
-                      ? -Dimensions.get("window").width
-                      : Dimensions.get("window").width,
                     mode: "Endless",
                   })
                 }

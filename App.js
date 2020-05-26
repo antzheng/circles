@@ -50,6 +50,7 @@ class App extends Component {
         <Stack.Navigator
           initialRouteName="Home"
           screenOptions={{
+            animationEnabled: false,
             gestureEnabled: true,
             gestureDirection: "horizontal",
             headerShown: false,

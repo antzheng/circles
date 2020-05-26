@@ -5,15 +5,9 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Image,
-  YellowBox,
 } from "react-native";
 import debounce from "lodash/debounce";
 import { styles } from "./../styles/Stylesheet";
-
-// ignore warning for passing function through params
-YellowBox.ignoreWarnings([
-  "Non-serializable values were found in the navigation state",
-]);
 
 class GameOver extends PureComponent {
   state = {};

@@ -1,7 +1,13 @@
 import { Dimensions, StyleSheet } from "react-native";
 
 // size of grid
-export const gridSize = 6;
+export const gridSize = 3;
+
+// number of seconds for Timed mode
+export const TimeLeft = 10;
+
+// number of moves for Moves mode
+export const MovesLeft = 30;
 
 // color palette from Dots
 // export const colors = {

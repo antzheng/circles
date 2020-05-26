@@ -16,10 +16,9 @@ import {
   colors,
   colorKeys,
   dotSize,
+  TimeLeft,
+  MovesLeft,
 } from "./../styles/Stylesheet";
-
-const TimeLeft = 60;
-const MovesLeft = 30;
 
 class Game extends PureComponent {
   // list all possible states for later
@@ -42,6 +41,15 @@ class Game extends PureComponent {
   constructor(props) {
     // call super constructor
     super(props);
+
+    // set up the refs
+    this.refsGrid = Array(gridSize)
+      .fill()
+      .map(() =>
+        Array(gridSize)
+          .fill()
+          .map(() => React.createRef())
+      );
 
     // populate the dots grid
     const dots = this.populateGrid([]);
@@ -66,8 +74,9 @@ class Game extends PureComponent {
     };
   }
 
-  // bind necessary methods
+  // set up when component first mounts
   componentDidMount() {
+    // bind necessary methods
     this.navigate = debounce(this.navigate, 500, {
       leading: true,
       trailing: false,
@@ -80,6 +89,15 @@ class Game extends PureComponent {
       leading: true,
       trailing: false,
     });
+
+    setTimeout(() => {
+      // set up the coordinate system
+      for (let i = 0; i < gridSize; i++) {
+        for (let j = 0; j < gridSize; j++) {
+          this.setPivot(i, j);
+        }
+      }
+    }, 500);
 
     // interval for Timed mode
     this.interval = null;
@@ -180,7 +198,9 @@ class Game extends PureComponent {
   async componentDidUpdate() {
     // define game over
     if (
-      (this.state.mode === "Time" && !this.state.possible) ||
+      (this.state.mode === "Time" &&
+        !this.state.possible &&
+        this.state.TimeLeft <= 2) ||
       this.state.TimeLeft === 0 ||
       this.state.MovesLeft === 0
     ) {
@@ -218,6 +238,7 @@ class Game extends PureComponent {
 
     // should i play the animation, prevents infinite cycle
     if (this.state.playAnim) {
+      this.setState({ playAnim: false });
       Animated.sequence([
         Animated.timing(this.state.shakeAnimation, {
           toValue: offset * 2,
@@ -240,7 +261,7 @@ class Game extends PureComponent {
           useNativeDriver: useNativeDriver,
         }),
       ]).start(({ finished }) => {
-        this.setState({ playAnim: false });
+        // this.setState({ playAnim: false });
       });
     }
   }
@@ -398,6 +419,9 @@ class Game extends PureComponent {
 
   // handler for when user releases touch
   handlerRelease = (event, gestureState) => {
+    // if for some reason no dots are selected
+    if (this.state.path.length === 0) return;
+
     // reset current dot, path, and styling upon release
     this.setState((state) => {
       // store reference to dots and size
@@ -594,20 +618,18 @@ class Game extends PureComponent {
 
   // store new pivot information
   setPivot = (i, j) => {
-    // check if there is offset from navigation transition
-    const offset = this.props.route.params
-      ? this.props.route.params.offset || 0
-      : 0;
-
     // store reference to view
-    const view = this.refs["dot" + i + j];
+    const view = this.refs["dots" + i + j];
+
+    // if it doesn't exist, i guess break the game?
+    if (!view) return;
 
     view.measure((x, y, width, height, pageX, pageY) => {
       // store layout information
       const layout = {
         width: width,
         height: height,
-        x: pageX - offset,
+        x: pageX,
         y: pageY,
       };
 
@@ -700,8 +722,7 @@ class Game extends PureComponent {
                   <View
                     collapsable={false}
                     key={"dot " + i + ", " + j}
-                    ref={"dot" + i + j}
-                    onLayout={() => this.setPivot(i, j)}
+                    ref={"dots" + i + j}
                     style={{
                       ...styles[dot.styling],
                       backgroundColor: dot.color,
