@@ -35,6 +35,7 @@ class Home extends PureComponent {
 
   // method to navigate to new screen
   navigate = (route, params) => {
+    this.props.playSelectFX();
     this.props.navigation.navigate(route, params);
   };
 

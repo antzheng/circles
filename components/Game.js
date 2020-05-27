@@ -1,6 +1,7 @@
 import React, { PureComponent } from "react";
 import {
   Animated,
+  Dimensions,
   PanResponder,
   Text,
   View,
@@ -12,10 +13,8 @@ import {
 import debounce from "lodash/debounce";
 import {
   styles,
-  gridSize,
   colors,
   colorKeys,
-  dotSize,
   TimeLeft,
   MovesLeft,
 } from "./../styles/Stylesheet";
@@ -50,9 +49,9 @@ class Game extends PureComponent {
     // set up the state
     this.state = {
       dots: dots,
-      pivots: Array(gridSize)
+      pivots: Array(props.gridSize)
         .fill()
-        .map(() => Array(gridSize).fill(0)),
+        .map(() => Array(props.gridSize).fill(0)),
       currentDot: null,
       path: [],
       toRemove: [],
@@ -90,8 +89,8 @@ class Game extends PureComponent {
     // set up pivots after slight delay
     setTimeout(() => {
       // set up the coordinate system
-      for (let i = 0; i < gridSize; i++) {
-        for (let j = 0; j < gridSize; j++) {
+      for (let i = 0; i < this.props.gridSize; i++) {
+        for (let j = 0; j < this.props.gridSize; j++) {
           this.setPivot(i, j);
         }
       }
@@ -200,6 +199,7 @@ class Game extends PureComponent {
 
   // method to go to the home screen
   popToTop = () => {
+    this.props.playSelectFX();
     this.props.navigation.popToTop();
   };
 
@@ -254,6 +254,7 @@ class Game extends PureComponent {
 
     // update dot if user has hovered over new one
     if (this.canAddToPath(res, currentDot)) {
+      this.props.playBlopFX(res[0], res[1]);
       this.setState((state) => {
         // change dot styling
         const dots = state.dots;
@@ -318,6 +319,7 @@ class Game extends PureComponent {
     }
     // otherwise, update dot if user has hovered over new one
     else if (this.canAddToPath(res, currentDot)) {
+      this.props.playBlopFX(res[0], res[1]);
       this.setState((state) => {
         // change dot styling
         const dots = state.dots;
@@ -337,13 +339,14 @@ class Game extends PureComponent {
     }
     // otherwise, highlight all dots of same color if there is square
     else if (this.isSquare(res, currentDot)) {
+      this.props.playSquareFX();
       this.setState((state) => {
         // change dot styling and add to toRemove
         const dots = state.dots;
         const toRemove = [];
 
-        for (let i = 0; i < gridSize; i++) {
-          for (let j = 0; j < gridSize; j++) {
+        for (let i = 0; i < this.props.gridSize; i++) {
+          for (let j = 0; j < this.props.gridSize; j++) {
             let exclude = false;
             for (const [x, y] of state.path) {
               if (i === x && j === y) {
@@ -526,7 +529,7 @@ class Game extends PureComponent {
   // populate the grid with dots
   populateGrid = (dots) => {
     // configure size of grid
-    const size = gridSize;
+    const size = this.props.gridSize;
 
     // retrieve keys to colors
     const keys = colorKeys;
@@ -668,6 +671,8 @@ class Game extends PureComponent {
     let finalPivot = null;
 
     // set a range where player can still tap dot without precision
+    const dotSize =
+      Dimensions.get("window").width / (this.props.gridSize * 2.1);
     const offset = dotSize / 2;
 
     // find the final pivot
@@ -691,6 +696,8 @@ class Game extends PureComponent {
   // -------------------- JSX SCREEN LAYOUT --------------------
 
   render() {
+    const dotSize =
+      Dimensions.get("window").width / (this.props.gridSize * 2.1);
     return (
       <>
         <SafeAreaView style={styles.topBar}>
@@ -736,6 +743,8 @@ class Game extends PureComponent {
                     ref={"dots" + i + j}
                     style={{
                       ...styles[dot.styling],
+                      height: dotSize,
+                      width: dotSize,
                       backgroundColor: dot.color,
                     }}
                   />

@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { YellowBox } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import { Audio } from "expo-av";
 import * as Font from "expo-font";
 import Home from "./components/Home";
 import Game from "./components/Game";
@@ -19,7 +20,13 @@ YellowBox.ignoreWarnings([
 ]);
 
 class App extends Component {
-  state = { fontLoaded: false };
+  state = {
+    fontLoaded: false,
+    soundPref: true,
+    musicPref: true,
+    gridSize: 6,
+    soundsLoaded: false,
+  };
 
   // -------------------- LIFECYCLE METHODS --------------------
 
@@ -30,8 +37,168 @@ class App extends Component {
       "Chelsea-Market": require("./assets/fonts/ChelseaMarket-Regular.ttf"),
     });
 
-    this.setState({ fontLoaded: true });
+    // get preferences from storage
+    const soundPref = await this.retrieveSoundPref();
+    const musicPref = await this.retrieveMusicPref();
+    const gridSize = await this.retrieveGridSize();
+
+    // update the state when font and sounds are loaded
+    this.setState({
+      fontLoaded: true,
+      soundPref: soundPref,
+      musicPref: musicPref,
+      gridSize: gridSize,
+    });
+
+    // set up the music and soundFX
+    this.backgroundMusic = new Audio.Sound();
+    this.selectFX = new Audio.Sound();
+    this.blopFX = Array(this.state.gridSize)
+      .fill()
+      .map(() =>
+        Array(this.state.gridSize)
+          .fill()
+          .map(() => new Audio.Sound())
+      );
+    this.squareFX = new Audio.Sound();
+
+    // configure all of the sounds
+    try {
+      // connect background music
+      await this.backgroundMusic.loadAsync(
+        require("./assets/sounds/backgroundMusic.mp3")
+      );
+
+      // connect select soundFX
+      await this.selectFX.loadAsync(require("./assets/sounds/select.wav"));
+
+      for (let i = 0; i < this.state.gridSize; i++) {
+        for (let j = 0; j < this.state.gridSize; j++) {
+          // connect blop soundFX
+          await this.blopFX[i][j].loadAsync(
+            require("./assets/sounds/blop.wav")
+          );
+        }
+      }
+
+      // connect square soundFX
+      await this.squareFX.loadAsync(require("./assets/sounds/square.wav"));
+
+      // set the background music to loop
+      await this.backgroundMusic.setIsLoopingAsync(true);
+
+      // update state for sound
+      this.setState({ soundsLoaded: true });
+
+      // play the music
+      if (this.state.musicPref) this.playMusic();
+    } catch (error) {}
   }
+
+  // when screen unmounts
+  componentWillUnmount() {
+    // stop all sounds and music
+    this.backgroundMusic.stopAsync();
+    for (let i = 0; i < this.state.gridSize; i++) {
+      for (let j = 0; j < this.state.gridSize; j++) {
+        this.blopFX[i][j].stopAsync();
+      }
+    }
+    this.selectFX.stopAsync();
+    this.squareFX.stopAsync();
+  }
+
+  // -------------------- SOUNDFX METHODS --------------------
+
+  // stop background music
+  stopMusic = () => {
+    this.backgroundMusic.stopAsync();
+  };
+
+  // play background music
+  playMusic = async () => {
+    if (this.state.soundsLoaded) await this.backgroundMusic.replayAsync();
+  };
+
+  // play select soundFX
+  playSelectFX = async () => {
+    if (this.state.soundPref && this.state.soundsLoaded)
+      await this.selectFX.replayAsync();
+  };
+
+  // play blop soundFX
+  playBlopFX = async (i, j) => {
+    if (this.state.soundPref && this.state.soundsLoaded)
+      await this.blopFX[i][j].replayAsync();
+  };
+
+  // play square soundFX
+  playSquareFX = async () => {
+    if (this.state.soundPref && this.state.soundsLoaded)
+      await this.squareFX.replayAsync();
+  };
+
+  // -------------------- STORAGE METHODS --------------------
+
+  // retrieve soundFX preferences from async storage
+  retrieveSoundPref = async () => {
+    try {
+      const key = "@sound-preferences";
+      const pref = await AsyncStorage.getItem(key);
+      if (pref === null) return true;
+      return JSON.parse(pref);
+    } catch (e) {
+      return true;
+    }
+  };
+
+  // retrieve music preferences from async storage
+  retrieveMusicPref = async () => {
+    try {
+      const key = "@music-preferences";
+      const pref = await AsyncStorage.getItem(key);
+      if (pref === null) return true;
+      return JSON.parse(pref);
+    } catch (e) {
+      return true;
+    }
+  };
+
+  // retrieve gridSize preferences from async storage
+  retrieveGridSize = async () => {
+    try {
+      const key = "@grid-size";
+      const pref = await AsyncStorage.getItem(key);
+      if (pref === null) return 6;
+      return JSON.parse(pref);
+    } catch (e) {
+      return 6;
+    }
+  };
+
+  // save soundFX preferences to async storage
+  saveSoundPref = async (boolean) => {
+    try {
+      const key = "@sound-preferences";
+      await AsyncStorage.setItem(key, JSON.stringify(boolean));
+    } catch (e) {}
+  };
+
+  // save soundFX preferences to async storage
+  saveMusicPref = async (boolean) => {
+    try {
+      const key = "@music-preferences";
+      await AsyncStorage.setItem(key, JSON.stringify(boolean));
+    } catch (e) {}
+  };
+
+  // save gridSize preferences to async storage
+  saveGridSize = async (number) => {
+    try {
+      const key = "@grid-size";
+      await AsyncStorage.setItem(key, JSON.stringify(number));
+    } catch (e) {}
+  };
 
   // -------------------- JSX SCREEN LAYOUT --------------------
 
@@ -47,16 +214,35 @@ class App extends Component {
           }}
         >
           <Stack.Screen name="Home">
-            {(props) => <Home {...props} fontLoaded={this.state.fontLoaded} />}
+            {(props) => (
+              <Home
+                {...props}
+                fontLoaded={this.state.fontLoaded}
+                playSelectFX={this.playSelectFX}
+              />
+            )}
           </Stack.Screen>
 
           <Stack.Screen name="Game">
-            {(props) => <Game {...props} fontLoaded={this.state.fontLoaded} />}
+            {(props) => (
+              <Game
+                {...props}
+                gridSize={this.state.gridSize}
+                fontLoaded={this.state.fontLoaded}
+                playSelectFX={this.playSelectFX}
+                playBlopFX={this.playBlopFX}
+                playSquareFX={this.playSquareFX}
+              />
+            )}
           </Stack.Screen>
 
           <Stack.Screen name="GameOver">
             {(props) => (
-              <GameOver {...props} fontLoaded={this.state.fontLoaded} />
+              <GameOver
+                {...props}
+                fontLoaded={this.state.fontLoaded}
+                playSelectFX={this.playSelectFX}
+              />
             )}
           </Stack.Screen>
 

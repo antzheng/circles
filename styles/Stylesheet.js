@@ -2,9 +2,6 @@ import { Dimensions, StyleSheet } from "react-native";
 
 // -------------------- GAMEPLAY CONSTANTS --------------------
 
-// size of grid
-export const gridSize = 6;
-
 // number of seconds for Timed mode
 export const TimeLeft = 60;
 
@@ -38,9 +35,6 @@ export const menuColors = {
   green: "#88c070",
 };
 
-// size of dots
-export const dotSize = Dimensions.get("window").width / (gridSize * 2.1);
-
 // keys for colors
 export const colorKeys = Object.keys(colors);
 
@@ -51,14 +45,10 @@ export const styles = StyleSheet.create({
   // -------------------- CIRCLE STYLING --------------------
 
   circle: {
-    height: dotSize,
-    width: dotSize,
     borderRadius: 100,
   },
 
   circleHover: {
-    height: dotSize,
-    width: dotSize,
     borderRadius: 100,
     opacity: 0.3,
   },

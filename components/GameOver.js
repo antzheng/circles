@@ -40,12 +40,14 @@ class GameOver extends PureComponent {
 
   // method to go back one screen
   pop = (refresh) => {
+    this.props.playSelectFX();
     if (refresh) this.props.route.params.refresh();
     this.props.navigation.pop();
   };
 
   // method to go to the home screen
   popToTop = () => {
+    this.props.playSelectFX();
     this.props.navigation.popToTop();
   };
 
