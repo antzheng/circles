@@ -21,11 +21,11 @@ YellowBox.ignoreWarnings([
 
 class App extends Component {
   state = {
-    fontLoaded: false,
-    soundPref: true,
-    musicPref: true,
-    gridSize: 6,
-    soundsLoaded: false,
+    fontLoaded: false, // has the font loaded
+    soundsLoaded: false, // have the sounds loaded
+    soundPref: true, // sound on/off
+    musicPref: true, // music on/off
+    gridSize: 6, // grid size 4, 5, or 6
   };
 
   // -------------------- LIFECYCLE METHODS --------------------
@@ -41,14 +41,6 @@ class App extends Component {
     const soundPref = await this.retrieveSoundPref();
     const musicPref = await this.retrieveMusicPref();
     const gridSize = await this.retrieveGridSize();
-
-    // update the state when font and sounds are loaded
-    this.setState({
-      fontLoaded: true,
-      soundPref: soundPref,
-      musicPref: musicPref,
-      gridSize: gridSize,
-    });
 
     // set up the music and soundFX
     this.backgroundMusic = new Audio.Sound();
@@ -87,25 +79,31 @@ class App extends Component {
       // set the background music to loop
       await this.backgroundMusic.setIsLoopingAsync(true);
 
-      // update state for sound
-      this.setState({ soundsLoaded: true });
+      // update the state when everything has loaded
+      this.setState({
+        fontLoaded: true,
+        soundsLoaded: true,
+        soundPref: soundPref,
+        musicPref: musicPref,
+        gridSize: gridSize,
+      });
 
       // play the music
-      if (this.state.musicPref) this.playMusic();
+      if (musicPref) this.playMusic();
     } catch (error) {}
   }
 
   // when screen unmounts
   componentWillUnmount() {
-    // stop all sounds and music
-    this.backgroundMusic.stopAsync();
+    // unload all sounds
+    this.backgroundMusic.unloadAsync();
     for (let i = 0; i < this.state.gridSize; i++) {
       for (let j = 0; j < this.state.gridSize; j++) {
-        this.blopFX[i][j].stopAsync();
+        this.blopFX[i][j].unloadAsync();
       }
     }
-    this.selectFX.stopAsync();
-    this.squareFX.stopAsync();
+    this.selectFX.unloadAsync();
+    this.squareFX.unloadAsync();
   }
 
   // -------------------- SOUNDFX METHODS --------------------
@@ -218,6 +216,7 @@ class App extends Component {
               <Home
                 {...props}
                 fontLoaded={this.state.fontLoaded}
+                soundsLoaded={this.state.soundsLoaded}
                 playSelectFX={this.playSelectFX}
               />
             )}

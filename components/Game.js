@@ -34,7 +34,7 @@ class Game extends PureComponent {
     freeze: null, // prevent adding if there is a square
     TimeLeft: null, // number of seconds left for Timed mode
     MovesLeft: null, // number of moves left for Moves mode
-    mode: null, // current mode the user is in
+    mode: null, // Time, Moves, or Endless
   };
 
   // -------------------- INITIAL SETUP --------------------
