@@ -157,6 +157,12 @@ export const styles = StyleSheet.create({
     fontSize: Dimensions.get("window").width / 15,
   },
 
+  smallText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: Dimensions.get("window").width / 20,
+  },
+
   titleText: {
     color: "white",
     fontWeight: "bold",

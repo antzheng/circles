@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { YellowBox } from "react-native";
+import { YellowBox, AsyncStorage } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Audio } from "expo-av";
@@ -8,6 +8,31 @@ import Home from "./components/Home";
 import Game from "./components/Game";
 import GameOver from "./components/GameOver";
 import Shuffling from "./components/Shuffling";
+import About from "./components/About";
+import Leaderboard from "./components/Leaderboard";
+import Settings from "./components/Settings";
+
+// -------------------- DEVELOPER NOTES --------------------
+
+// the keys for async storage:
+// - @Time-highscore
+// - @Moves-highscore
+// - @sound-preferences
+// - @music-preferences
+// - @grid-size
+
+// the modes for UI:
+// - Timed
+// - Moves
+// - Endless
+
+// the modes for state:
+// - Time
+// - Moves
+// - Endless
+
+// clear storage for development
+// AsyncStorage.clear();
 
 // -------------------- NAVIGATOR SETUP --------------------
 
@@ -17,6 +42,7 @@ const Stack = createStackNavigator();
 // ignore warnings
 YellowBox.ignoreWarnings([
   "Non-serializable values were found in the navigation state",
+  "Warning: Failed prop type",
 ]);
 
 class App extends Component {
@@ -177,6 +203,7 @@ class App extends Component {
   // save soundFX preferences to async storage
   saveSoundPref = async (boolean) => {
     try {
+      this.setState({ soundPref: boolean });
       const key = "@sound-preferences";
       await AsyncStorage.setItem(key, JSON.stringify(boolean));
     } catch (e) {}
@@ -185,6 +212,7 @@ class App extends Component {
   // save soundFX preferences to async storage
   saveMusicPref = async (boolean) => {
     try {
+      this.setState({ musicPref: boolean });
       const key = "@music-preferences";
       await AsyncStorage.setItem(key, JSON.stringify(boolean));
     } catch (e) {}
@@ -193,6 +221,7 @@ class App extends Component {
   // save gridSize preferences to async storage
   saveGridSize = async (number) => {
     try {
+      this.setState({ gridSize: number });
       const key = "@grid-size";
       await AsyncStorage.setItem(key, JSON.stringify(number));
     } catch (e) {}
@@ -248,6 +277,44 @@ class App extends Component {
           <Stack.Screen name="Shuffling">
             {(props) => (
               <Shuffling {...props} fontLoaded={this.state.fontLoaded} />
+            )}
+          </Stack.Screen>
+
+          <Stack.Screen name="About">
+            {(props) => (
+              <About
+                {...props}
+                fontLoaded={this.state.fontLoaded}
+                playSelectFX={this.playSelectFX}
+              />
+            )}
+          </Stack.Screen>
+
+          <Stack.Screen name="Leaderboard">
+            {(props) => (
+              <Leaderboard
+                {...props}
+                fontLoaded={this.state.fontLoaded}
+                playSelectFX={this.playSelectFX}
+              />
+            )}
+          </Stack.Screen>
+
+          <Stack.Screen name="Settings">
+            {(props) => (
+              <Settings
+                {...props}
+                soundPref={this.state.soundPref}
+                musicPref={this.state.musicPref}
+                gridSize={this.state.gridSize}
+                fontLoaded={this.state.fontLoaded}
+                playSelectFX={this.playSelectFX}
+                playMusic={this.playMusic}
+                stopMusic={this.stopMusic}
+                saveSoundPref={this.saveSoundPref}
+                saveMusicPref={this.saveMusicPref}
+                saveGridSize={this.saveGridSize}
+              />
             )}
           </Stack.Screen>
         </Stack.Navigator>

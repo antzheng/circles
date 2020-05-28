@@ -184,18 +184,26 @@ class Home extends PureComponent {
             </View>
 
             <View style={styles.bottomBar}>
-              <Image
-                style={styles.smallIcon}
-                source={require("./../assets/icons/about.png")}
-              />
-              <Image
-                style={styles.smallIcon}
-                source={require("./../assets/icons/leaderboard.png")}
-              />
-              <Image
-                style={styles.smallIcon}
-                source={require("./../assets/icons/settings.png")}
-              />
+              <TouchableOpacity onPress={() => this.navigate("About")}>
+                <Image
+                  style={styles.smallIcon}
+                  source={require("./../assets/icons/about.png")}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => this.navigate("Leaderboard")}>
+                <Image
+                  style={styles.smallIcon}
+                  source={require("./../assets/icons/leaderboard.png")}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => this.navigate("Settings")}>
+                <Image
+                  style={styles.smallIcon}
+                  source={require("./../assets/icons/settings.png")}
+                />
+              </TouchableOpacity>
             </View>
           </>
         )}
