@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "Circles",
+    "description": "An addictive puzzle game about connecting circles! ",
     "slug": "Circles",
     "platforms": ["ios", "android"],
     "version": "1.0.0",
@@ -16,7 +17,14 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anthonyzheng.circles",
+      "buildNumber": "1.0.0"
+    },
+    "android": {
+      "package": "com.anthonyzheng.circles",
+      "versionCode": 1,
+      "permissions": []
     }
   }
 }
